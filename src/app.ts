@@ -146,7 +146,7 @@ app.get('/contracts/:walletAddress/created', async (req: Request, res: Response)
 app.get('/.well-known/ai-plugin.json', (req: Request, res: Response) => {
 
   const host = req.headers.host;
-  const filePath = path.join(__dirname, '..', '.well-known', 'ai-plugin.json');
+  const filePath = path.join(__dirname, '.well-known', 'ai-plugin.json');
   fs.readFile(filePath, 'utf8', (err, text) => {
     if (err) {
       res.status(500).send('Error reading ai-plugin.json');
@@ -161,7 +161,7 @@ app.get('/.well-known/ai-plugin.json', (req: Request, res: Response) => {
 
 // Serve the OpenAPI specification
 app.get('/openapi.yaml', (req: Request, res: Response) => {
-  const filePath = path.join(__dirname, '..', 'openapi.yaml');
+  const filePath = path.join(__dirname, 'openapi.yaml');
   fs.readFile(filePath, 'utf8', (err, text) => {
     if (err) {
       res.status(500).send('Error reading openapi.yaml');
