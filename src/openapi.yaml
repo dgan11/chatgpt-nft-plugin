@@ -53,6 +53,34 @@ paths:
                     type: integer
                     format: int64
                     description: The current gas price.
+  /refresh/{contractAddress}/{tokenId}:
+    get:
+      operationId: refreshNftMetadata
+      summary: Refresh metadata for a given contract and token
+      parameters:
+        - name: contractAddress
+          in: path
+          required: true
+          description: The address of the NFT contract
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          required: true
+          description: The ID of the token within the NFT contract
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshedMetadata:
+                    type: boolean
+                    description: Indicates if the metadata was successfully refreshed
   /nft/{contractAddress}/floor:
     get:
       operationId: getFloorPrice
@@ -192,3 +220,26 @@ paths:
                       type: integer
                       format: int32
                       description: The number of NFTs owned by the wallet address.
+  /contracts/{walletAddress}/created:
+    get:
+      operationId: findContractsDeployed
+      summary: Get all contracts deployed by a wallet
+      description: Returns an array of contract addresses deployed by the specified wallet address.
+      parameters:
+        - in: path
+          name: walletAddress
+          schema:
+            type: string
+          required: true
+          description: The Ethereum wallet address.
+      responses:
+        "200":
+          description: A successful response with an array of contract addresses.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        "400":
+          description: Bad Request. Invalid wallet address provided.

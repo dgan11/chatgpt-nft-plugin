@@ -46,6 +46,14 @@ app.get('/gas', async (req: Request, res: Response) => {
   res.send('current gas price: ' + gasPrice);
 })
 
+// Refresh metadata for a given contract and token
+app.get('/refresh/:contractAddress/:tokenId', async (req: Request, res: Response) => {
+  const contractAddress = req.params.contractAddress.toLowerCase();
+  const tokenId = req.params.tokenId;
+  const response = await alchemy.nft.refreshNftMetadata(contractAddress, tokenId);
+  return res.status(200).json(response);
+})
+
 // Get floor price of an nft
 app.get('/nft/:contractAddress/floor', async (req: Request, res: Response) => { 
   const contractAddress = req.params.contractAddress.toLowerCase();
@@ -85,6 +93,55 @@ app.get('/contract/:contractAddress/owners', async (req: Request, res: Response)
   return res.status(200).json(owners);
 })
 
+// Get all contracts deployed by a wallet
+async function findContractsDeployed(address: string) {
+  const transfers = [];
+  // Paginate through the results using getAssetTransfers method
+  let response = await alchemy.core.getAssetTransfers({
+    fromBlock: "0x0",
+    toBlock: "latest", // Fetch results up to the latest block
+    fromAddress: address, // Filter results to only include transfers from the specified address
+    excludeZeroValue: false, // Include transfers with a value of 0
+    category: ["external" as any], // Filter results to only include contract creations
+  });
+  transfers.push(...response.transfers);
+
+  // Continue fetching and aggregating results while there are more pages
+  while (response.pageKey) {
+    let pageKey = response.pageKey;
+    response = await alchemy.core.getAssetTransfers({
+      fromBlock: "0x0",
+      toBlock: "latest",
+      fromAddress: address,
+      excludeZeroValue: false,
+      category: ["external" as any],
+      pageKey: pageKey,
+    });
+    transfers.push(...response.transfers);
+  }
+
+  // Filter the transfers to only include contract deployments (where 'to' is null)
+  const deployments = transfers.filter((transfer) => transfer.to === null);
+  const txHashes = deployments.map((deployment) => deployment.hash);
+
+  // Fetch the transaction receipts for each of the deployment transactions
+  const promises = txHashes.map((hash) =>
+    alchemy.core.getTransactionReceipt(hash)
+  );
+
+  // Wait for all the transaction receipts to be fetched
+  const receipts = await Promise.all(promises);
+  const contractAddresses = receipts.map((receipt) => receipt?.contractAddress);
+  return contractAddresses;
+}
+
+app.get('/contracts/:walletAddress/created', async (req: Request, res: Response) => {
+  const walletAddress = req.params.walletAddress.toLowerCase();
+  const contracts = await findContractsDeployed(walletAddress);
+  return res.status(200).json(contracts);
+})
+  
+
 // Serve the ai-plugin.json manifest file
 app.get('/.well-known/ai-plugin.json', (req: Request, res: Response) => {
   // const URL = process.env.URL || 'http://localhost:3002';
@@ -105,10 +162,10 @@ app.get('/.well-known/ai-plugin.json', (req: Request, res: Response) => {
 
 // Serve the OpenAPI specification
 app.get('/openapi.yaml', (req: Request, res: Response) => {
-  const filePath = path.join(__dirname, 'openai.yaml');
+  const filePath = path.join(__dirname, 'openapi.yaml');
   fs.readFile(filePath, 'utf8', (err, text) => {
     if (err) {
-      res.status(500).send('Error reading openai.yaml');
+      res.status(500).send('Error reading openapi.yaml');
       return;
     }
     res.setHeader('Content-Type', 'text/yaml');
