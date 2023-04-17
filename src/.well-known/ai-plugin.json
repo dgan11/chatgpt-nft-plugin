@@ -9,10 +9,10 @@
   },
   "api": {
     "type": "openapi",
-    "url": "http://localhost:3002/openapi.yaml",
+    "url": "https://gpt-nft-plugin.herokuapp.com/openapi.yaml",
     "is_user_authenticated": false
   },
-  "logo_url": "http://localhost:3002/logo.jpg",
+  "logo_url": "https://gpt-nft-plugin.herokuapp.com/logo.jpg",
   "contact_email": "support@example.com",
-  "legal_info_url": "http://www.example.com/legal"
+  "legal_info_url": "https://gpt-nft-plugin.herokuapp.com/legal"
 }
