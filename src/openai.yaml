@@ -1,0 +1,194 @@
+openapi: 3.0.1
+info:
+  title: NFT and Gas API
+  description: A plugin that allows users to fetch NFT and gas information using ChatGPT.
+  version: 'v1'
+servers:
+  - url: http://localhost:3002
+paths:
+  /test:
+    get:
+      operationId: getTest
+      summary: Get the test endpoint response
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: The test message.
+  /:
+    get:
+      operationId: getLatestBlock
+      summary: Get the latest block number
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latestBlock:
+                    type: integer
+                    format: int64
+                    description: The latest block number.
+  /gas:
+    get:
+      operationId: getCurrentGasPrice
+      summary: Get the current gas price
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gasPrice:
+                    type: integer
+                    format: int64
+                    description: The current gas price.
+  /nft/{contractAddress}/floor:
+    get:
+      operationId: getFloorPrice
+      summary: Get the floor price of an NFT
+      parameters:
+        - name: contractAddress
+          in: path
+          description: The contract address of the NFT.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  floorPrice:
+                    type: number
+                    format: double
+                    description: The floor price of the NFT.
+  /nfts/{walletAddress}/owned:
+    get:
+      operationId: getOwnedNfts
+      summary: Get all NFTs owned by a wallet
+      parameters:
+        - name: walletAddress
+          in: path
+          description: The wallet address of the owner.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tokenId:
+                      type: string
+                      description: The token ID of the NFT.
+                    contractAddress:
+                      type: string
+                      description: The contract address of the NFT.
+  /nfts/{walletAddress}/minted:
+    get:
+      operationId: getMintedNfts
+      summary: Get all NFTs minted by a wallet
+      parameters:
+        - name: walletAddress
+          in: path
+          description: The wallet address of the creator.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    tokenId:
+                      type: string
+                      description: The token ID of the NFT.
+                    contractAddress:
+                      type: string
+                      description: The contract address of the NFT.
+  /contract/{contractAddress}/{tokenId}/owners:
+    get:
+      operationId: getOwnersForNft
+      summary: Get all owners of a given NFT contract and tokenId
+      parameters:
+        - name: contractAddress
+          in: path
+          description: The contract address of the NFT.
+          required: true
+          schema:
+            type: string
+        - name: tokenId
+          in: path
+          description: The token ID of the NFT.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    owner:
+                      type: string
+                      description: The owner's wallet address.
+                    balance:
+                      type: integer
+                      format: int32
+                      description: The number of NFTs owned by the wallet address.
+  /contract/{contractAddress}/owners:
+    get:
+      operationId: getOwnersForContract
+      summary: Get all the owners for a given NFT contract and their token balances
+      parameters:
+        - name: contractAddress
+          in: path
+          description: The contract address of the NFT.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    owner:
+                      type: string
+                      description: The owner's wallet address.
+                    balance:
+                      type: integer
+                      format: int32
+                      description: The number of NFTs owned by the wallet address.
