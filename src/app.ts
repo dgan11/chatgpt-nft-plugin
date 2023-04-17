@@ -16,7 +16,7 @@ const config = {
 const alchemy = new Alchemy(config);
 
 const app = express();
-const port = 3002;
+const port = process.env.PORT || 3002;
 
 // Enable CORS for all routes
 app.use(cors({ origin: '*' }));
@@ -144,7 +144,6 @@ app.get('/contracts/:walletAddress/created', async (req: Request, res: Response)
 
 // Serve the ai-plugin.json manifest file
 app.get('/.well-known/ai-plugin.json', (req: Request, res: Response) => {
-  // const URL = process.env.URL || 'http://localhost:3002';
 
   const host = req.headers.host;
   const filePath = path.join(__dirname, '.well-known', 'ai-plugin.json');
