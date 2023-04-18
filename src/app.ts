@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 import { Alchemy, Network } from "alchemy-sdk";
+import { formatNFTResponse, formatOwnersResponse } from './responseFormatters';
 
 // Load environment variables from the .env file
 dotenv.config();
@@ -32,9 +33,6 @@ app.get('/test', (req: Request, res: Response) => {
 })
 
 
-//async app.get
-
-// Test
 app.get('/', async (req: Request, res: Response) => {
   const latestBlock = await alchemy.core.getBlockNumber();
   res.send('latest block: ' + latestBlock);
@@ -64,33 +62,39 @@ app.get('/nft/:contractAddress/floor', async (req: Request, res: Response) => {
 // Get all nfts owned by a wallet
 app.get('/nfts/:walletAddress/owned', async (req: Request, res: Response) => { 
   const walletAddress = req.params.walletAddress.toLowerCase();
-  const nfts = await alchemy.nft.getNftsForOwner(walletAddress);
-  return res.status(200).json(nfts);
-})
+  const response:any = await alchemy.nft.getNftsForOwner(walletAddress);
+  const nfts = response!.ownedNfts;
+  const formattedNFTs = formatNFTResponse(nfts);
+  return res.status(200).json(formattedNFTs);
+});
 
 // Get all minted nfts by a wallet
 app.get('/nfts/:walletAddress/minted', async (req: Request, res: Response) => {
   const walletAddress = req.params.walletAddress.toLowerCase();
-  const nfts = await alchemy.nft.getMintedNfts(walletAddress);
-  return res.status(200).json(nfts);
+  const response:any = await alchemy.nft.getMintedNfts(walletAddress);
+  const nfts = response!.nfts;
+  const formattedNFTs = formatNFTResponse(nfts);
+  return res.status(200).json(formattedNFTs);
 })
 
 // Get all owners of a given nft contract and tokenId
 app.get('/contract/:contractAddress/:tokenId/owners', async (req: Request, res: Response) => {
   const contractAddress = req.params.contractAddress.toLowerCase();
   const tokenId = req.params.tokenId;
-  const owners = await alchemy.nft.getOwnersForNft(contractAddress, tokenId);
+  const response:any = await alchemy.nft.getOwnersForNft(contractAddress, tokenId);
+  const owners = response?.owners;
   return res.status(200).json(owners);
 })
 
 // Get all the owners for a given NFT contract + token balance
 app.get('/contract/:contractAddress/owners', async (req: Request, res: Response) => { 
   const contractAddress = req.params.contractAddress.toLowerCase();
-  const owners = await alchemy.nft.getOwnersForContract(
+  const response:any = await alchemy.nft.getOwnersForContract(
     contractAddress, 
     { withTokenBalances: true}
   );
-  return res.status(200).json(owners);
+  const owners = response!.owners;
+  return res.status(200).json(formatOwnersResponse(owners));
 })
 
 // Get all contracts deployed by a wallet

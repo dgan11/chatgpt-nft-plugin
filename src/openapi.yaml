@@ -131,6 +131,12 @@ paths:
                     contractAddress:
                       type: string
                       description: The contract address of the NFT.
+                    name:
+                      type: string
+                      description: The name of the Contract.
+                    tokenType:
+                      type: string
+                      description: The type of token the NFT is.
   /nfts/{walletAddress}/minted:
     get:
       operationId: getMintedNfts
@@ -158,6 +164,12 @@ paths:
                     contractAddress:
                       type: string
                       description: The contract address of the NFT.
+                    name:
+                      type: string
+                      description: The name of the Contract.
+                    tokenType:
+                      type: string
+                      description: The type of token the NFT is.
   /contract/{contractAddress}/{tokenId}/owners:
     get:
       operationId: getOwnersForNft
@@ -185,13 +197,25 @@ paths:
                 items:
                   type: object
                   properties:
-                    owner:
+                    ownerAddress:
                       type: string
                       description: The owner's wallet address.
-                    balance:
+                    tokenBalances:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          tokenId:
+                            type: string
+                            description: The token ID of the NFT.
+                          balance:
+                            type: integer
+                            format: int32
+                            description: The number of NFTs with the specified token ID owned by the wallet address.
+                    numTokensOwned:
                       type: integer
                       format: int32
-                      description: The number of NFTs owned by the wallet address.
+                      description: The total number of NFTs owned by the wallet address.
   /contract/{contractAddress}/owners:
     get:
       operationId: getOwnersForContract
@@ -211,15 +235,8 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    owner:
-                      type: string
-                      description: The owner's wallet address.
-                    balance:
-                      type: integer
-                      format: int32
-                      description: The number of NFTs owned by the wallet address.
+                  type: string
+                  description: The owner's wallet address.
   /contracts/{walletAddress}/created:
     get:
       operationId: findContractsDeployed
@@ -241,5 +258,6 @@ paths:
                 type: array
                 items:
                   type: string
+                  description: Contract addresses created by the wallet address.
         "400":
           description: Bad Request. Invalid wallet address provided.
